@@ -9,7 +9,6 @@ import { GamePageRoutingModule } from './game-routing.module';
 import { GamePage } from './game.page';
 import { GameBoardComponent } from './components/game-board/game-board.component';
 import { GridComponent } from './components/grid/grid.component';
-import { CellComponent } from './components/cell/cell.component';
 import { TilesComponent } from './components/tiles/tiles.component';
 import { InputDirective } from './controller/input.directive';
 
@@ -21,6 +20,6 @@ import { InputDirective } from './controller/input.directive';
     GamePageRoutingModule,
 
   ],
-  declarations: [GamePage, GameBoardComponent, GridComponent, CellComponent, TilesComponent, InputDirective]
+  declarations: [GamePage, GameBoardComponent, GridComponent, TilesComponent, InputDirective]
 })
 export class GamePageModule { }
