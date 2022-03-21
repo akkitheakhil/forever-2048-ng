@@ -6,7 +6,7 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, Inject, Input, 
   templateUrl: './tiles.component.html',
   styleUrls: ['./tiles.component.scss'],
 })
-export class TilesComponent implements OnInit, AfterViewInit {
+export class TilesComponent implements OnInit, AfterViewChecked {
 
   @ViewChild('tile') tile!: ElementRef;
   private tileValue: number;
@@ -36,7 +36,7 @@ export class TilesComponent implements OnInit, AfterViewInit {
   ngOnInit() {
   }
 
-  ngAfterViewInit() {
+  ngAfterViewChecked() {
     this.createTile();
   }
 
