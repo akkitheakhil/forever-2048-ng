@@ -1,0 +1,65 @@
+.tile {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border-radius: 1vmin;
+  top: calc(var(--y) * (var(--cell-size) + var(--cell-gap)) + var(--cell-gap));
+  left: calc(var(--x) * (var(--cell-size) + var(--cell-gap)) + var(--cell-gap));
+  font-weight: bold;
+  color: hsl(200, 25%, var(--text-lightness));
+  animation: show 200ms ease-in-out;
+  transition: 100ms ease-in-out;
+  &__2 {
+    background-color: var(--color-2);
+  }
+
+  &__4 {
+    background-color: var(--color-4);
+  }
+
+  &__8 {
+    background-color: var(--color-8);
+  }
+
+  &__16 {
+    background-color: var(--color-16);
+  }
+
+  &__32 {
+    background-color: var(--color-32);
+  }
+
+  &__64 {
+    background-color: var(--color-64);
+  }
+
+  &__128 {
+    background-color: var(--color-128);
+  }
+
+  &__256 {
+    background-color: var(--color-256);
+  }
+
+  &__512 {
+    background-color: var(--color-512);
+  }
+
+  &__1024 {
+    background-color: var(--color-1024);
+  }
+
+  &__2048 {
+    background-color: var(--color-2048);
+  }
+}
+
+@keyframes show {
+  0% {
+    opacity: 0.5;
+    transform: scale(0);
+  }
+}

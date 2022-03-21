@@ -1,0 +1,19 @@
+:root {
+  height: 100%;
+  width: 100%;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), var(--cell-size));
+  grid-template-rows: repeat(var(--grid-size), var(--cell-size));
+  gap: var(--cell-gap);
+  border-radius: 1vmin;
+  padding: var(--cell-gap);
+  position: relative;
+  background-color: var(--game-board-color);
+
+  .cell {
+    background-color: var(--game-board-cell);
+    border-radius: 1vmin;
+  }
+}

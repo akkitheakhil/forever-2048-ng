@@ -9,6 +9,9 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
+/* APP FONTS */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;700&family=League+Gothic&display=swap");
+
 /* Core CSS required for Ionic components to work properly */
 @import "~@ionic/angular/css/core.css";
 
@@ -16,7 +19,7 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import '~@ionic/angular/css/display.css';
+@import "~@ionic/angular/css/display.css";
 
 /* Optional CSS utils that can be commented out */
 @import "~@ionic/angular/css/padding.css";
@@ -24,3 +27,45 @@
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
+
+/* Theme variables */
+:root {
+  --primary-font: "League Gothic", sans-serif;
+  --background-color: #0d0d0d;
+  --font-color: #ffffff;
+
+  // 2048 COLORS
+  --color-2: #cad5e2;
+  --color-4: #e5d68a;
+  --color-8: #ff6666;
+  --color-16: #e03b8b;
+  --color-32: #8d3daf;
+  --color-64: #e07c24;
+  --color-128: #5a20cb;
+  --color-256: #35bdd0;
+  --color-512: #e8bd0d;
+  --color-1024: #38cc77;
+  --color-2048: #bf3325;
+
+  --game-board-color: #242b2e;
+  --game-board-cell: #758283;
+
+  --ion-safe-area-top: 20px;
+  --ion-safe-area-bottom: 22px;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+html {
+  box-sizing: border-box;
+  color: var(--font-color);
+  font-family: var(--primary-font);
+  background: var(--background-color);
+  height: 100vh;
+  font-size: 7.5vmin;
+  overflow: hidden;
+}

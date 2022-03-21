@@ -1,0 +1,9 @@
+<div class="grid" data-game-grid>
+  <ng-container *ngFor="let cell of cellList">
+    <div class="cell"></div>
+  </ng-container>
+
+  <ng-container *ngFor="let tile of tileList">
+    <app-tiles [value]="tile.value" [x]="tile.x" [y]="tile.y"></app-tiles>
+  </ng-container>
+</div>
