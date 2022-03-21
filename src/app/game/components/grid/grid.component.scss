@@ -16,4 +16,8 @@
     background-color: var(--game-board-cell);
     border-radius: 1vmin;
   }
+
+  .tile-container {
+    position: absolute;
+  }
 }

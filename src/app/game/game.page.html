@@ -4,7 +4,7 @@
   <div class="container">
     <div class="header">
       <div class="score">
-        <h1 class="score-text">2048</h1>
+        <h1 class="score-text">{{ gameScore$ | async }}</h1>
       </div>
     </div>
     <div class="content" appInput>
@@ -14,7 +14,13 @@
       <ion-button expand="full" color="light" strong="true" routerLink="/home"
         >Back</ion-button
       >
-      <ion-button expand="full" color="light" strong="true">RESTART</ion-button>
+      <ion-button
+        expand="full"
+        color="light"
+        strong="true"
+        (click)="handleRestartGame()"
+        >RESTART</ion-button
+      >
     </div>
   </div>
 </ion-content>

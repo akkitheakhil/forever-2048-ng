@@ -1,3 +1,4 @@
+import { GameService } from './services/game.service';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -7,9 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GamePage implements OnInit {
 
-  constructor() { }
+  gameScore$ = this.gameService.score$;
+  constructor(private gameService: GameService) { }
 
   ngOnInit() {
+  }
+
+  handleRestartGame() {
+    this.gameService.restartGame$.next(true);
   }
 
 }

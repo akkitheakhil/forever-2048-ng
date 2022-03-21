@@ -4,6 +4,11 @@
   </ng-container>
 
   <ng-container *ngFor="let tile of tileList">
-    <app-tiles [value]="tile.value" [x]="tile.x" [y]="tile.y"></app-tiles>
+    <app-tiles
+      [value]="tile.value"
+      [x]="tile.x"
+      [y]="tile.y"
+      class="tile-container"
+    ></app-tiles>
   </ng-container>
 </div>

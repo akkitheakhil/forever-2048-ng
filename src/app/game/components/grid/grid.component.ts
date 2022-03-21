@@ -1,17 +1,18 @@
 import { Tile } from '../../models/game-tiles.model';
 import { InputService } from '../../controller/input.service';
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, Input, OnInit } from '@angular/core';
-import { debounceTime, last, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { debounceTime, last, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { of, Subject } from 'rxjs';
 import { Cell } from '../../models/game-cell.model';
+import { GameService } from '../../services/game.service';
 import { AnyForUntypedForms } from '@angular/forms';
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.scss'],
 })
-export class GridComponent implements OnInit {
+export class GridComponent implements OnInit, OnDestroy {
 
   @Input() gridSize: number;
   @Input() cellSize: number;
@@ -20,13 +21,17 @@ export class GridComponent implements OnInit {
   tileList: Tile[] = [];
   cellList: Cell[] = [];
 
+  private destroy$ = new Subject();
+
   constructor(@Inject(DOCUMENT) private document: Document,
-    private inputService: InputService
+    private inputService: InputService,
+    private gameService: GameService
   ) { }
 
   ngOnInit(): void {
     this.gameStart();
     this.handleInputEvents();
+    this.restartGame();
   }
 
   gameStart(): void {
@@ -82,18 +87,38 @@ export class GridComponent implements OnInit {
 
   handleInputEvents(): void {
     this.inputService.inputHandler$.pipe(switchMap((key: string) => of(key)),
-      debounceTime(500)
+      debounceTime(500),
+      takeUntil(this.destroy$),
     ).subscribe((key: string) => {
       this.gameMovement(key);
     });
   }
 
+  restartGame(): void {
+    this.gameService.restartGame$.pipe(takeUntil(this.destroy$),).subscribe((restart) => {
+      if (!restart) {
+        return;
+      }
+      this.tileList = [];
+      this.cellList = [];
+      this.gameStart();
+      this.gameService.score$.next(0);
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private canMove(cells: any) {
     return cells.some((group: any) => group.some((cell: Cell, index: number) => {
       if (index === 0) { return false; }
+
       if (cell?.tile?.value == null) {
         return false;
       }
+
       const moveToPos = group[index - 1];
       const moveToCell = this.findCellByPos(moveToPos);
       return this.cellCanAccept(moveToCell, cell.tile.value);
@@ -111,14 +136,14 @@ export class GridComponent implements OnInit {
   }
 
   private findCellByPos(pos: { x: number; y: number }) {
-    return this.cellList.find(cell => cell.x === pos.x && cell.y === pos.y);
+    return this.cellList.find(cell => cell?.x === pos?.x && cell?.y === pos?.y);
   }
   private findCellIndexByPos(pos: { x: number; y: number }) {
-    return this.cellList.findIndex(cell => cell.x === pos.x && cell.y === pos.y);
+    return this.cellList.findIndex(cell => cell?.x === pos?.x && cell?.y === pos?.y);
   }
 
   private findTileIndexByPos(pos: { x: number; y: number }) {
-    return this.tileList.findIndex(tile => tile.x === pos.x && tile.y === pos.y);
+    return this.tileList.findIndex(tile => tile?.x === pos?.x && tile?.y === pos?.y);
   }
   private gameMovement(direction: string) {
 
@@ -130,10 +155,10 @@ export class GridComponent implements OnInit {
         this.moveDown();
         break;
       case 'ArrowLeft':
-        //this.moveLeft();
+        this.moveLeft();
         break;
       case 'ArrowRight':
-        //this.moveRight();
+        this.moveRight();
         break;
     }
   }
@@ -145,6 +170,7 @@ export class GridComponent implements OnInit {
 
     if (canMove) {
       this.slideTiles(cellsByColumn);
+      this.generateNewTile();
     }
   }
 
@@ -152,10 +178,29 @@ export class GridComponent implements OnInit {
     const cellsByColumn = this.getCellsByColumn();
     const cols = cellsByColumn.map((column: any) => [...column].reverse());
     const canMove = this.canMove(cols);
-    console.log(canMove);
-
     if (canMove) {
       this.slideTiles(cols);
+      this.generateNewTile();
+    }
+  }
+
+  private moveLeft() {
+    const cellsByRow = this.getCellsByRow();
+    const canMove = this.canMove(cellsByRow);
+
+    if (canMove) {
+      this.slideTiles(cellsByRow);
+      this.generateNewTile();
+    }
+  }
+
+  private moveRight() {
+    const cellsByRow = this.getCellsByRow();
+    const rows = cellsByRow.map((row: any) => [...row].reverse());
+    const canMove = this.canMove(rows);
+    if (canMove) {
+      this.slideTiles(rows);
+      this.generateNewTile();
     }
   }
 
@@ -175,8 +220,6 @@ export class GridComponent implements OnInit {
         if (lastValidCell != null) {
           if (lastValidCell.tile !== null && lastValidCell.tile !== undefined) {
             lastValidCell.mergeTile = cell.tile;
-            lastValidCell.tile.value = lastValidCell.tile.value * 2;
-
           } else {
             lastValidCell.tile = cell.tile;
           }
@@ -188,22 +231,46 @@ export class GridComponent implements OnInit {
   }
 
   private moveTile(_cell: Cell) {
-    console.log(JSON.stringify(_cell));
+    if (!_cell || !_cell.tile) {
+      return;
+    }
     const cellIndex = this.findCellIndexByPos(_cell);
     const tileIndex = this.findTileIndexByPos(_cell.tile);
-
+    const mergeTile = _cell.mergeTile;
     if (cellIndex === -1 || tileIndex === -1) {
       return;
     }
-
     this.tileList[tileIndex].x = _cell.x;
     this.tileList[tileIndex].y = _cell.y;
-    this.cellList[this.findCellIndexByPos(_cell.tile)].tile = undefined;
-    // if (_cell.mergeTile !== null && _cell.mergeTile !== undefined) {
-    //   this.tileList[tileIndex].value = _cell.mergeTile.value;
+    const cellTileIndex = this.findCellIndexByPos(_cell.tile);
+    this.cellList[cellTileIndex].tile = null;
+    this.cellList[cellTileIndex].mergeTile = null;
+    this.cellList[cellIndex].tile = this.tileList[tileIndex];
+    if (mergeTile) {
+      const value = this.tileList[tileIndex].value + mergeTile.value;
+      this.tileList[tileIndex].value = value;
+      this.removeMergeTile(mergeTile);
+      this.calculateScore(value);
+    }
 
-    // }
   }
 
+  private generateNewTile() {
+    const randomEmptyCellOne = this.getRandomEmptyCell();
+    this.cellAddTile(randomEmptyCellOne);
+    this.tileList.push(randomEmptyCellOne);
+  }
 
+  private removeMergeTile(pos: { x: number; y: number }) {
+    const cellIndex = this.findCellIndexByPos(pos);
+    const tileIndex = this.findTileIndexByPos(pos);
+    this.cellList[cellIndex].mergeTile = null;
+    this.cellList[cellIndex].tile = null;
+    this.tileList.splice(tileIndex, 1);
+  }
+
+  private calculateScore(_score: number) {
+    const score = this.gameService.score$.getValue() + _score;
+    this.gameService.score$.next(score);
+  }
 }
