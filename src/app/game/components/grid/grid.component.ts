@@ -2,11 +2,10 @@ import { Tile } from '../../models/game-tiles.model';
 import { InputService } from '../../controller/input.service';
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { debounceTime, last, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, switchMap, takeUntil } from 'rxjs/operators';
 import { of, Subject } from 'rxjs';
 import { Cell } from '../../models/game-cell.model';
 import { GameService } from '../../services/game.service';
-import { AnyForUntypedForms } from '@angular/forms';
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.component.html',
@@ -22,6 +21,7 @@ export class GridComponent implements OnInit, OnDestroy {
   cellList: Cell[] = [];
 
   private destroy$ = new Subject();
+  private isGameOver = false;
 
   constructor(@Inject(DOCUMENT) private document: Document,
     private inputService: InputService,
@@ -90,6 +90,9 @@ export class GridComponent implements OnInit, OnDestroy {
       debounceTime(500),
       takeUntil(this.destroy$),
     ).subscribe((key: string) => {
+      if (this.isGameOver) {
+        return;
+      }
       this.gameMovement(key);
     });
   }
@@ -103,6 +106,7 @@ export class GridComponent implements OnInit, OnDestroy {
       this.cellList = [];
       this.gameStart();
       this.gameService.score$.next(0);
+      this.isGameOver = false;
     });
   }
 
@@ -121,7 +125,7 @@ export class GridComponent implements OnInit, OnDestroy {
 
       const moveToPos = group[index - 1];
       const moveToCell = this.findCellByPos(moveToPos);
-      return this.cellCanAccept(moveToCell, cell.tile.value);
+      return this.cellCanAccept(moveToCell, Number(cell.tile.value));
     }));
   }
 
@@ -161,6 +165,20 @@ export class GridComponent implements OnInit, OnDestroy {
         this.moveRight();
         break;
     }
+
+    const cellsByColumn = this.getCellsByColumn();
+    const cols = cellsByColumn.map((column: any) => [...column].reverse());
+    const cellsByRow = this.getCellsByRow();
+    const rows = cellsByRow.map((row: any) => [...row].reverse());
+    const canMoveUp = this.canMove(cellsByColumn);
+    const canMoveDown = this.canMove(cols);
+    const canMoveLeft = this.canMove(cellsByRow);
+    const canMoveRight = this.canMove(rows);
+
+    if (!canMoveUp && !canMoveDown && !canMoveLeft && !canMoveRight) {
+      this.handleGameOver();
+    }
+
   }
 
   private moveUp() {
@@ -247,7 +265,7 @@ export class GridComponent implements OnInit, OnDestroy {
     this.cellList[cellTileIndex].mergeTile = null;
     this.cellList[cellIndex].tile = this.tileList[tileIndex];
     if (mergeTile) {
-      const value = this.tileList[tileIndex].value + mergeTile.value;
+      const value = Number(this.tileList[tileIndex].value) + Number(mergeTile.value);
       this.tileList[tileIndex].value = value;
       this.removeMergeTile(mergeTile);
       this.calculateScore(value);
@@ -272,5 +290,19 @@ export class GridComponent implements OnInit, OnDestroy {
   private calculateScore(_score: number) {
     const score = this.gameService.score$.getValue() + _score;
     this.gameService.score$.next(score);
+  }
+
+  private handleGameOver() {
+    this.tileList = [];
+    // this.cellList = [];
+    this.isGameOver = true;
+    'GAME'.split('').forEach((letter: string, index: number) => {
+      const tile = { x: index, y: 1, value: letter.toUpperCase() };
+      this.tileList.push(tile);
+    });
+    'OVER'.split('').forEach((letter: string, index: number) => {
+      const tile = { x: index, y: 2, value: letter.toUpperCase() };
+      this.tileList.push(tile);
+    });
   }
 }

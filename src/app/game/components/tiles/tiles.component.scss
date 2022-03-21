@@ -24,27 +24,33 @@
     background-color: var(--color-4);
   }
 
-  &__8 {
+  &__8,
+  &__M {
     background-color: var(--color-8);
   }
 
-  &__16 {
+  &__16,
+  &__E {
     background-color: var(--color-16);
   }
 
-  &__32 {
+  &__32,
+  &__O {
     background-color: var(--color-32);
   }
 
-  &__64 {
+  &__64,
+  &__V {
     background-color: var(--color-64);
   }
 
-  &__128 {
+  &__128,
+  &__E {
     background-color: var(--color-128);
   }
 
-  &__256 {
+  &__256,
+  &__R {
     background-color: var(--color-256);
   }
 
@@ -52,11 +58,13 @@
     background-color: var(--color-512);
   }
 
-  &__1024 {
+  &__1024,
+  &__A {
     background-color: var(--color-1024);
   }
 
-  &__2048 {
+  &__2048,
+  &__G {
     background-color: var(--color-2048);
   }
 }

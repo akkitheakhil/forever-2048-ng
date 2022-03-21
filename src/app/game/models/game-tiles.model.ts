@@ -1,5 +1,5 @@
 export interface Tile {
-  value?: number;
+  value?: number | string;
   x: number;
   y: number;
 }
